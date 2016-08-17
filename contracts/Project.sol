@@ -1,12 +1,16 @@
 contract Project {
 
+  struct ProjectInfo {
+    string name;
+    string description;
+    string url;
+    address owner;
+    uint targetAmount;
+    uint deadline;
+  }
+
+  ProjectInfo public info;
   address public hub;
-  address public owner;
-  string public name;
-  string public description;
-  string public url;
-  uint public targetAmount;
-  uint public deadline;
   uint public collectedFunds;
   uint public status; // 0: in progress - 1: payed out - 2: refunded
 
@@ -23,12 +27,14 @@ contract Project {
     if (_targetAmount == 0) throw;
     if (_deadline < now) throw;
     hub = msg.sender;
-    owner = _owner;
-    name = _name;
-    description = _description;
-    url = _url;
-    targetAmount = _targetAmount;
-    deadline = _deadline;
+    info = ProjectInfo({
+      owner: _owner,
+      name: _name,
+      description: _description,
+      url: _url,
+      targetAmount: _targetAmount,
+      deadline: _deadline,
+    });
   }
 
   modifier onlyHub() {
@@ -49,9 +55,9 @@ contract Project {
   // being reached, the function must call refund.
   function fund(address source) onlyHub {
     // do not check the contributor address becase it is forwarded by the hub, there no risk it could be 0
-    if (now <= deadline) {
+    if (now <= info.deadline) {
       if (msg.value > 0) {
-        uint amount = targetAmount - collectedFunds; // targetAmount is always >= of collectedFunds
+        uint amount = info.targetAmount - collectedFunds; // targetAmount is always >= of collectedFunds
         if (msg.value > amount) {
           // returns the change
           if (!source.send(msg.value - amount)) throw;
@@ -59,12 +65,12 @@ contract Project {
           amount = msg.value;
         }
         collectedFunds += amount;
-        Contributor info = contributorInfo[source];
-        if (info.amount == 0)
-          info.index = contributors.push(source);
-        info.amount += amount;
+        Contributor cData = contributorInfo[source];
+        if (cData.amount == 0)
+          cData.index = contributors.push(source);
+        cData.amount += amount;
         // do payout if the target is reached. The check is >= but the collected funds never exceeds the target
-        if (collectedFunds >= targetAmount) payout();
+        if (collectedFunds >= info.targetAmount) payout();
       }
     } else {
       // fundraising period expired
@@ -82,10 +88,11 @@ contract Project {
     // only when balance == collectedFunds == targetAmount
     if (status == 0) {
       status = 1;
-      payedOut = owner.send();
-      // forward untrasfered ethers or excees amount (there should never be) to the hub to be handled by the manteiner
+      payedOut = info.owner.send(collectedFunds);
+      // forward untrasfered ethers or excees amount (there should never be) to the hub to be handled by the maintainer
       if (this.balance > 0)
         hub.call.value(this.balance);
+      return payedOut;
     }
   }
 
@@ -93,13 +100,18 @@ contract Project {
   function refund() private {
     if (status == 0) {
       status = 2;
-      uint count = contributors.length;
-      for (uint i=0; i < count; i++) {
+      uint contributorsCount = contributors.length;
+      for (uint i=0; i < contributorsCount; i++) {
         address target = contributors[i];
-        Contributor info = contributorInfo[target];
-        if (!target.send(info.amount))
-          notRefund += info.amount);
+        Contributor c = contributorInfo[target];
+        if (!target.send(c.amount)) {
+          // ignore transfer errors because all untrasfered funds will be forwarded
+          // to the hub to be handled by the maintainer
+        }
       }
+      // forward untrasfered ethers to the hub to be handled by the maintainer
+      if (this.balance > 0)
+        hub.call.value(this.balance);
     }
   }
 

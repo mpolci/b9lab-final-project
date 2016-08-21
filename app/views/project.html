@@ -1,0 +1,20 @@
+<section>
+  <h2>Project: {{ project.details.name }}</h2>
+  <ul>
+    <li>Address: {{ project.details.address }}</li>
+    <li>Description: {{ project.details.description }}</li>
+    <li>Web site: <a href="{{ project.details.url }}">{{ project.details.url }}</a></li>
+    <li>Owner: {{ project.details.owner }}</li>
+    <li>Deadline: {{ project.details.deadline | ethereumTimestamp | date:'medium' }}</li>
+    <li>Target: {{ project.details.targetAmount | unitEther }} eth</li>
+    <li>Collected funds: {{ project.details.collectedFunds | unitEther }} eth</li>
+    <li>status: {{ project.details.status | projectStatus }}</li>
+  </ul>
+  <div class="action">
+    <div>Already contributed with {{ project.controlAccountContribution | unitEther}} eth</div>
+    <label>Contribute with (eth):
+      <input name="amount" type="number" ng-model="project.contribInput" required unit-ether>
+    </label>
+    <button ng-click="project.doContribute()">Contribute</button>
+  </div>
+</section>

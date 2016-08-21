@@ -1,0 +1,20 @@
+<section>
+  <h2>Create a new project</h2>
+  <label>Name:
+    <input type="text" ng-model="create.name">
+  </label>
+  <label>Description:
+    <input type="text" ng-model="create.description">
+  </label>
+  <label>Website url:
+    <input type="text" ng-model="create.url">
+  </label>
+  <label>Target (eth):
+    <input type="number" ng-model="create.targetAmount">
+  </label>
+  <label>Deadline:
+    <input type="datetime-local" ng-model="create.deadline" required ethereum-timestamp>
+  </label>
+  <button ng-click="create.doCreate()">Submit</button>
+
+</section>

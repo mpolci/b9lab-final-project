@@ -1,16 +1,19 @@
-angular.module('fundingHubApp', ['ngRoute'])
+angular.module('fundingHubApp', ['ui.router'])
 
-.config(function($routeProvider, $locationProvider) {
-  $routeProvider
-   .when('/project/:prjId', {
-      templateUrl: 'project.html',
-      controller: 'ProjectController',
-    })
-    .when('/create', {
-      templateUrl: 'create.html',
-      controller: 'CreateProjectController'
-    });
+.config(function($stateProvider) {
+  $stateProvider
+  .state('project', {
+    params: {
+      address: ''
+    },
+    templateUrl: 'views/project.html',
+    controller: 'ProjectDetails',
+    controllerAs: 'project'
+  })
+  .state('create', {
+    templateUrl: 'views/create.html',
+    controller: 'CreateProject',
+    controllerAs: 'create'
+  })
 
-  // configure html5 to get links working on jsfiddle
-  $locationProvider.html5Mode(true);
-});
+})

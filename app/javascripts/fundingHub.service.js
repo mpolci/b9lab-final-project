@@ -1,4 +1,4 @@
-angular.module('fundingHubApp').service('fundingHubService', function ($q, $log, controlAccountService) {
+angular.module('fundingHubApp').service('fundingHubService', function ($rootScope, $q, $log, controlAccountService) {
   var self = this
   angular.extend(this, {
     projects: {},
@@ -48,17 +48,27 @@ angular.module('fundingHubApp').service('fundingHubService', function ($q, $log,
     })
   }
 
-  function getCurrentAccountContribution() {
+  function getCurrentAccountContribution(prjAddr) {
     return controlAccountService.selectedAccount
-      ? $q.when(Project.at(self.selectedProject.address).contributionOf.call(controlAccountService.selectedAccount))
+      ? $q.when(Project.at(prjAddr).contributionOf.call(controlAccountService.selectedAccount))
       : $q.reject('No control account selected')
   }
 
   function createProject(name, desc, url, target, deadline) {
+    var source = controlAccountService.selectedAccount
     return $q.when(hub.createProject(name, desc, url, target, deadline, {from: controlAccountService.selectedAccount}))
+    .then(function (txid) {
+      $rootScope.$broadcast('NewTransaction', { from: source, txid: txid })
+      return txid
+    })
   }
 
-  function contributeToProject() {
-
+  function contributeToProject(prjAddr, amount) {
+    var source = controlAccountService.selectedAccount
+    return $q.when(hub.contribute(prjAddr, {from: source, value: amount}))
+    .then(function (txid) {
+      $rootScope.$broadcast('NewTransaction', { from: source, txid: txid })
+      return txid
+    })
   }
 })

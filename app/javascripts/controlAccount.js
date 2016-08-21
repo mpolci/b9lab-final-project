@@ -30,7 +30,7 @@ angular.module('fundingHubApp')
   }
 })
 
-.controller('controlAccountController', function ($rootScope, $log, controlAccountService) {
+.controller('controlAccountController', function ($rootScope, $scope, $log, controlAccountService) {
   var self = this
   angular.extend(this, {
     accounts: [],
@@ -48,6 +48,14 @@ angular.module('fundingHubApp')
     }
   })
 
+  $scope.$on('NewTransaction', function (event, args) {
+    if (args.from === self.selected) {
+      controlAccountService.getBalance(self.selected).then(function (value) {
+        self.balance = value
+      })
+    }
+  })
+  
   /*********************************************************/
 
   function onSelectedChange() {

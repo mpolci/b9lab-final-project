@@ -1,18 +1,36 @@
-angular.module('fundingHubApp').service('fundingHubService', function ($q, controlAccountService) {
+angular.module('fundingHubApp').service('fundingHubService', function ($q, $log, controlAccountService) {
   var self = this
   angular.extend(this, {
-    getProjects: getProjects,
-    getProjectDetails: getProjectDetails,
+    projects: {},
     createProject: createProject,
+    contributeToProject: contributeToProject,
+    getCurrentAccountContribution: getCurrentAccountContribution,
   })
   var hub = FundingHub.deployed()
   var prjInfoOutputs = Project.abi.find(function (item) { return item.name === 'info' }).outputs
 
-  function getProjects() {
-    return $q.when(hub.getProjects())
+
+  $q.when(hub.getProjects())
+  .then(function (projects) {
+    $log.debug(projects)
+    projects.forEach(_addProj)
+  })
+
+  eventNewProject = hub.NewProject(function (error, result) {
+    if (error) return $log.error(error)
+    _addProj(result.args.project)
+  })
+
+  function _addProj(addr) {
+    var pd = { address: addr }
+    self.projects[addr] = pd
+    _fetchProjectDetails(addr)
+    .then(function (details) {
+      angular.extend(pd, details)
+    })
   }
 
-  function getProjectDetails(address) {
+  function _fetchProjectDetails(address) {
     var details = { address: address }
     var prj = Project.at(address)
     return $q.all([

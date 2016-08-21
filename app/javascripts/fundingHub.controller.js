@@ -1,29 +1,13 @@
 angular.module('fundingHubApp').controller('FundingHubController', function ($scope, $log, $q, fundingHubService) {
   var self = this
   angular.extend(this, {
-    projects: [],
+    projects: fundingHubService.projects,
     selectedProject: null,
     createProject: null,
 
     goToProject: goToProject,
     goToCreate: goToCreate,
     doCreate: doCreate,
-  })
-
-  fundingHubService.getProjects()
-  .then(function (projects) {
-    $log.debug(projects)
-    self.projects = projects.map(function (addr) {
-      return { address: addr }
-    })
-  })
-  .then(function () {
-    self.projects.forEach(function (p) {
-      fundingHubService.getProjectDetails(p.address)
-      .then(function (details) {
-        angular.extend(p, details)
-      })
-    })
   })
 
   $scope.$on('controlAccountChanged', function () {

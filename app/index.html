@@ -48,8 +48,36 @@
         <li>status: {{ fundingHub.selectedProject.status | projectStatus }}</li>
       </ul>
       <div class="action">
-        
+        <label>Contribute with (eth):
+          <input name="amount" type="number" ng-model="fundingHub.selectedProject.contribInput" required unit-ether>
+        </label>
+        <button ng-click="fundingHub.doContribute()">Contribute</button>
       </div>
+    </section>
+
+    <section ng-if="fundingHub.createProject">
+      <h2>Create a new project</h2>
+      <label>Name:
+        <input type="text" ng-model="fundingHub.createProject.name">
+      </label>
+      <label>Description:
+        <input type="text" ng-model="fundingHub.createProject.description">
+      </label>
+      <label>Website url:
+        <input type="text" ng-model="fundingHub.createProject.url">
+      </label>
+      <label>Target (eth):
+        <input type="number" ng-model="fundingHub.createProject.targetAmount">
+      </label>
+      <label>Deadline:
+        <input type="datetime-local" ng-model="fundingHub.createProject.deadline" required ethereum-timestamp>
+      </label>
+      <button ng-click="fundingHub.doCreate()">Submit</button>
+        <!-- name: '',
+        description: '',
+        url: '',
+        targetAmount: '',
+        deadline: Math.floor(Date.now() / 1000) -->
     </section>
 
   </div>

@@ -3,7 +3,7 @@ angular.module('fundingHubApp').service('fundingHubService', function ($q, contr
   angular.extend(this, {
     getProjects: getProjects,
     getProjectDetails: getProjectDetails,
-
+    createProject: createProject,
   })
   var hub = FundingHub.deployed()
   var prjInfoOutputs = Project.abi.find(function (item) { return item.name === 'info' }).outputs
@@ -30,8 +30,14 @@ angular.module('fundingHubApp').service('fundingHubService', function ($q, contr
     })
   }
 
-  function createProject() {
+  function getCurrentAccountContribution() {
+    return controlAccountService.selectedAccount
+      ? $q.when(Project.at(self.selectedProject.address).contributionOf.call(controlAccountService.selectedAccount))
+      : $q.reject('No control account selected')
+  }
 
+  function createProject(name, desc, url, target, deadline) {
+    return $q.when(hub.createProject(name, desc, url, target, deadline, {from: controlAccountService.selectedAccount}))
   }
 
   function contributeToProject() {

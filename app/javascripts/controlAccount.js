@@ -30,7 +30,7 @@ angular.module('fundingHubApp')
   }
 })
 
-.controller('controlAccountController', function ($scope, $log, controlAccountService) {
+.controller('controlAccountController', function ($rootScope, $log, controlAccountService) {
   var self = this
   angular.extend(this, {
     accounts: [],
@@ -55,6 +55,7 @@ angular.module('fundingHubApp')
     controlAccountService.getBalance(self.selected).then(function (value) {
       self.balance = value
     })
+    $rootScope.$broadcast('controlAccountChanged')
   }
 
 })

@@ -3,7 +3,7 @@ import 'Project.sol';
 contract FundingHub {
   address public maintainer;
   mapping (address => bool) public inHub;
-  Project[] public projects;
+  address[] public projects;
   // TODO: projects mi permette di ottenere solo l'indirizzo di un progetto dato il suo indice,
   // devo creare un'interfaccia che mi permetta il reperimento dei progetti
 
@@ -51,4 +51,9 @@ contract FundingHub {
       if (!maintainer.call(this.balance)) throw;
     }
   }
+
+  function getProjects() constant returns(address[]) {
+    return projects;
+  }
+
 }

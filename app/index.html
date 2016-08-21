@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html ng-app="fundingHubApp">
+<head>
+  <title>Funding Hub</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.min.js"></script> -->
+  <!-- <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'> -->
+  <link href="./app.css" rel='stylesheet' type='text/css'>
+  <script src="./app.js"></script>
+  <script src="./angularapp.js"></script>
+</head>
+<body>
+  <h1>Funding Hub</h1>
+
+  <section class="action" ng-controller="controlAccountController as control">
+    <h2>My account</h2>
+    <label for="account">Select a control account: </label>
+    <select id="account"
+      ng-model="control.selected"
+      ng-change="control.onSelectedChange()">
+      <option ng-repeat="a in control.accounts" value="{{a}}">{{ $index }}</option>
+    </select>
+    <div class="info">
+      <span>Address: {{ control.selected }}</span>
+      <span>balance: {{ control.balance | unitEther }} eth</span>
+    </div>
+  </section>
+
+  <div ng-controller="FundingHubController as fundingHub">
+    <section>
+      <h2>Projects</h2>
+      <a href ng-click="fundingHub.goToCreate()">Create a new project</a>
+      <div ng-repeat="prj in fundingHub.projects">
+        <a href ng-click="fundingHub.goToProject($index)">{{prj.address}} - {{prj.name}}</a>
+      </div>
+    </section>
+
+    <section ng-if="fundingHub.selectedProject">
+      <h2>Project: {{ fundingHub.selectedProject.name }}</h2>
+      <ul>
+        <li>Address: {{ fundingHub.selectedProject.address }}</li>
+        <li>Description: {{ fundingHub.selectedProject.description }}</li>
+        <li>Web site: <a href="{{ fundingHub.selectedProject.url }}">{{ fundingHub.selectedProject.url }}</a></li>
+        <li>Owner: {{ fundingHub.selectedProject.owner }}</li>
+        <li>Deadline: {{ fundingHub.selectedProject.deadline | ethereumTimestamp | date:'medium' }}</li>
+        <li>Target: {{ fundingHub.selectedProject.targetAmount | unitEther }} eth</li>
+        <li>Collected funds: {{ fundingHub.selectedProject.collectedFunds | unitEther }} eth</li>
+        <li>status: {{ fundingHub.selectedProject.status | projectStatus }}</li>
+      </ul>
+      <div class="action">
+        
+      </div>
+    </section>
+
+  </div>
+<!--
+  <section class="action info" ng-controller="transactionInfoController as txInfo">
+    <h2>Status</h2>
+    <div ng-if="txInfo.lastBTx">Created transaction {{ txInfo.lastBTx }}</div>
+    <div ng-if="txInfo.lastMinedTx">Transaction mined {{ txInfo.lastMinedTx }}</div>
+    <div ng-if="txInfo.lastError">
+      <span class="error">Error:</span>
+      <span class="error-details">{{ txInfo.lastError }}</span>
+    </div>
+  </section>
+
+  <div class="action" ng-controller="predictionMarketsController as mc">
+    <a href ui-sref="create">Create a new prediction market</a>
+    <h2>Available predictions markets</h2>
+    <div ng-repeat="addr in mc.availMrktAddrs">
+      <a href ng-click="mc.selectMarket(addr)">{{addr}} - {{mc.marketsDetails[addr].question}}</a>
+    </div>
+  </div>
+
+  <section ui-view></section>
+
+  <div ng-controller="mistController"></div>
+   -->
+</body>
+</html>

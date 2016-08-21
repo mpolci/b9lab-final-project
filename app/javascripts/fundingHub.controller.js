@@ -7,7 +7,6 @@ angular.module('fundingHubApp').controller('FundingHubController', function ($sc
 
     goToProject: goToProject,
     goToCreate: goToCreate,
-    doCreate: doCreate,
   })
 
   $scope.$on('controlAccountChanged', function () {
@@ -39,22 +38,34 @@ angular.module('fundingHubApp').controller('FundingHubController', function ($sc
     }
   }
 
-  function doCreate() {
-    if (!self.createProject) return $log.error('invalid state')
-    var args = self.createProject
-    fundingHubService.createProject(args.name, args.description, args.url, args.targetAmount, args.deadline)
-    .then(function (txid) {
-      //TODO
-    })
-  }
-
   function doContribute() {
 
   }
 
 })
 
-.controller('ProjectController', function ($scope, $routeParams, $log, $q, fundingHubService) {
+.controller('CreateProject', function ($log, fundingHubService) {
+  var self = this
+  angular.extend(this, {
+    name: '',
+    description: '',
+    url: '',
+    targetAmount: '',
+    deadline: Math.floor(Date.now() / 1000),
+
+    doCreate: doCreate,
+  })
+
+  function doCreate() {
+    fundingHubService.createProject(self.name, self.description, self.url, self.targetAmount, self.deadline)
+    .then(function (txid) {
+      $log.info('New Transaction: ', txid)
+    })
+  }
+
+})
+
+.controller('ProjectDetails', function ($scope, $routeParams, $log, $q, fundingHubService) {
   var self = this
   angular.extend(this, {
     details: null,

@@ -3,6 +3,7 @@
 <head>
   <title>Funding Hub</title>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-route.js"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.min.js"></script> -->
   <!-- <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'> -->
   <link href="./app.css" rel='stylesheet' type='text/css'>
@@ -55,29 +56,25 @@
       </div>
     </section>
 
-    <section ng-if="fundingHub.createProject">
+    <section ng-if="fundingHub.createProject" ng-controller="CreateProject as create">
       <h2>Create a new project</h2>
       <label>Name:
-        <input type="text" ng-model="fundingHub.createProject.name">
+        <input type="text" ng-model="create.name">
       </label>
       <label>Description:
-        <input type="text" ng-model="fundingHub.createProject.description">
+        <input type="text" ng-model="create.description">
       </label>
       <label>Website url:
-        <input type="text" ng-model="fundingHub.createProject.url">
+        <input type="text" ng-model="create.url">
       </label>
       <label>Target (eth):
-        <input type="number" ng-model="fundingHub.createProject.targetAmount">
+        <input type="number" ng-model="create.targetAmount">
       </label>
       <label>Deadline:
-        <input type="datetime-local" ng-model="fundingHub.createProject.deadline" required ethereum-timestamp>
+        <input type="datetime-local" ng-model="create.deadline" required ethereum-timestamp>
       </label>
-      <button ng-click="fundingHub.doCreate()">Submit</button>
-        <!-- name: '',
-        description: '',
-        url: '',
-        targetAmount: '',
-        deadline: Math.floor(Date.now() / 1000) -->
+      <button ng-click="create.doCreate()">Submit</button>
+      
     </section>
 
   </div>

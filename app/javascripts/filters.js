@@ -3,18 +3,18 @@
   let filters = [
     {
       name: 'ethereumTimestamp',
-      toView: (data) => new Date(data * 1000),
-      fromView: (data) => Math.floor(data.getTime() / 1000)
+      toView: function (data) { return new Date(data * 1000) },
+      fromView: function (data) { return Math.floor(data.getTime() / 1000) }
     },
     {
       name: 'unitEther',
-      toView: (data) => web3.fromWei(web3.toBigNumber(data), 'ether').toNumber(),
-      fromView: (data) => web3.toWei(data, 'ether')
+      toView: function (data) { return web3.fromWei(web3.toBigNumber(data), 'ether').toNumber() },
+      fromView: function (data) { return web3.toWei(data, 'ether') }
     },
   ]
 
   let app = angular.module('fundingHubApp')
-  filters.forEach(f => {
+  filters.forEach(function (f) {
     app.filter(f.name, function () {
       return f.toView
     })

@@ -8,7 +8,7 @@
     <li>Deadline: {{ project.details.deadline | ethereumTimestamp | date:'medium' }}</li>
     <li>Target: {{ project.details.targetAmount | unitEther }} eth</li>
     <li>Collected funds: {{ project.details.collectedFunds | unitEther }} eth</li>
-    <li>status: {{ project.details.status | projectStatus }}</li>
+    <li>Status: {{ project.details.status | projectStatus }}</li>
   </ul>
   <div class="action">
     <div>Already contributed with {{ project.controlAccountContribution | unitEther}} eth</div>

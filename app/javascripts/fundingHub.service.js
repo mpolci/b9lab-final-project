@@ -63,13 +63,31 @@ angular.module('fundingHubApp').service('fundingHubService', function ($rootScop
       : $q.reject('No control account selected')
   }
 
+  function _getTxReceipt(txid) {
+    return $q(function (resolve, reject) {
+      web3.eth.getTransactionReceipt(txid, function (err, receipt) {
+        if (err) return reject(err)
+        if (!receipt) return reject('Transaction not found')
+        resolve(receipt)
+      })
+    })
+  }
+
   function createProject(name, desc, url, target, deadline) {
     if (!name || !target || !deadline) return $q.reject('Missing argument')
     var source = controlAccountService.selectedAccount
-    return $q.when(hub.createProject(name, desc, url, target, deadline, {from: controlAccountService.selectedAccount}))
+    var gas = 800000
+    var tx
+    return $q.when(hub.createProject(name, desc, url, target, deadline, {from: controlAccountService.selectedAccount, gas: gas}))
     .then(function (txid) {
       $rootScope.$broadcast('NewTransaction', { from: source, txid: txid })
-      return txid
+      tx = txid
+      return _getTxReceipt(txid)
+    })
+    .then(function (receipt) {
+      $log.debug('Consumed gas', receipt.gasUsed)
+      if (receipt.gasUsed === gas) return $q.reject('Out of gas')
+      return tx
     })
   }
 
@@ -78,11 +96,17 @@ angular.module('fundingHubApp').service('fundingHubService', function ($rootScop
     if (!prjAddr) return $q.reject('Unknown project address')
     var prj = Project.at(prjAddr)
     var source = controlAccountService.selectedAccount
+    var gas = 300000
     var tx
-    return $q.when(hub.contribute(prjAddr, {from: source, value: amount}))
+    return $q.when(hub.contribute(prjAddr, {from: source, value: amount, gas: gas}))
     .then(function (txid) {
       $rootScope.$broadcast('NewTransaction', { from: source, txid: txid })
       tx = txid
+      return _getTxReceipt(txid)
+    })
+    .then(function (receipt) {
+      $log.debug('Consumed gas', receipt.gasUsed)
+      if (receipt.gasUsed === gas) return $q.reject('Out of gas')
       return $q.all([
         prj.collectedFunds(),
         prj.status(),

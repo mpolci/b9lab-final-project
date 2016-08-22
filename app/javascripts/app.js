@@ -15,5 +15,4 @@ angular.module('fundingHubApp', ['ui.router'])
     controller: 'CreateProject',
     controllerAs: 'create'
   })
-
 })

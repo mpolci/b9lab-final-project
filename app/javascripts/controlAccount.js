@@ -34,18 +34,24 @@ angular.module('fundingHubApp')
   var self = this
   angular.extend(this, {
     accounts: [],
-    selected: controlAccountService.selectedAccount,
+    selected: null,
     balance: null,
 
     onSelectedChange: onSelectedChange,
   })
 
-  controlAccountService.getAvailableAccounts().then(function (accounts) {
+  controlAccountService.getAvailableAccounts()
+  .then(function (accounts) {
     self.accounts = accounts
     if (accounts.length > 0) {
       self.selected = accounts[0]
       onSelectedChange()
     }
+  })
+  .catch(function (err) {
+    $log.error(err)
+    controlAccountService.selectedAccount = null
+    self.error = err
   })
 
   $scope.$on('NewTransaction', function (event, args) {
@@ -55,7 +61,7 @@ angular.module('fundingHubApp')
       })
     }
   })
-  
+
   /*********************************************************/
 
   function onSelectedChange() {
@@ -63,7 +69,7 @@ angular.module('fundingHubApp')
     controlAccountService.getBalance(self.selected).then(function (value) {
       self.balance = value
     })
-    $rootScope.$broadcast('controlAccountChanged')
+    $rootScope.$broadcast('ControlAccountChanged')
   }
 
 })

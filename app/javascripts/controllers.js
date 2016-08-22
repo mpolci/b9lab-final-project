@@ -15,14 +15,20 @@ angular.module('fundingHubApp')
     url: '',
     targetAmount: '',
     deadline: Math.floor(Date.now() / 1000),
+    error: null,
 
     doCreate: doCreate,
   })
 
   function doCreate() {
+    self.error = null
     fundingHubService.createProject(self.name, self.description, self.url, self.targetAmount, self.deadline)
     .then(function (txid) {
       $log.info('New Transaction: ', txid)
+    })
+    .catch(function (err) {
+      self.error = err.toString()
+      $log.error(err)
     })
   }
 
@@ -35,12 +41,13 @@ angular.module('fundingHubApp')
     details: fundingHubService.projects[$stateParams.address],
     controlAccountContribution: 0,
     contribInput: 0,
+    error: null,
 
     doContribute: doContribute,
   })
 
   _refreshContribution()
-  $scope.$on('controlAccountChanged', _refreshContribution)
+  $scope.$on('ControlAccountChanged', _refreshContribution)
 
   function _refreshContribution() {
     fundingHubService.getCurrentAccountContribution(self.details.address)
@@ -50,9 +57,15 @@ angular.module('fundingHubApp')
   }
 
   function doContribute() {
+    self.error = null
     fundingHubService.contributeToProject(self.details.address, self.contribInput)
     .then(function (txid) {
       $log.info('New Transaction: ', txid)
+      _refreshContribution()
+    })
+    .catch(function (err) {
+      self.error = err.toString()
+      $log.error(err)
     })
   }
 

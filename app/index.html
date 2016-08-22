@@ -14,16 +14,23 @@
 
   <section class="action" ng-controller="controlAccountController as control">
     <h2>My account</h2>
-    <label for="account">Select a control account: </label>
-    <select id="account"
-      ng-model="control.selected"
-      ng-change="control.onSelectedChange()">
-      <option ng-repeat="a in control.accounts" value="{{a}}">{{ $index }}</option>
-    </select>
-    <div class="info">
-      <span>Address: {{ control.selected }}</span>
-      <span>balance: {{ control.balance | unitEther }} eth</span>
+    <div ng-if="!control.error">
+      <label for="account">Select a control account: </label>
+      <select id="account"
+        ng-model="control.selected"
+        ng-change="control.onSelectedChange()">
+        <option ng-repeat="a in control.accounts" value="{{a}}">{{ $index }}</option>
+      </select>
+      <div class="info">
+        <span>Address: {{ control.selected }}</span>
+        <span>balance: {{ control.balance | unitEther }} eth</span>
+      </div>
     </div>
+    
+    <div class="error" ng-if="control.error">
+      Cannot fetch accounts list.
+    </div>
+
   </section>
 
   <div ng-controller="ProjectsList as list">

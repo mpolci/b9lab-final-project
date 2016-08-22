@@ -16,5 +16,9 @@
       <input name="amount" type="number" ng-model="project.contribInput" required unit-ether>
     </label>
     <button ng-click="project.doContribute()">Contribute</button>
+
+    <div class="error" ng-if="project.error">
+      {{ project.error }}
+    <div>
   </div>
 </section>

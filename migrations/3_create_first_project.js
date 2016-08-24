@@ -23,22 +23,7 @@ module.exports = function(deployer) {
     })
   }))
 
-  /*******************************************************************/
-
-  // On testrpc this code doesn't work due to a testrpc bug (see https://github.com/ethereumjs/testrpc/issues/145).
-  // It works on geth rpc node. For this reason I used the alternative
-  // implementation in getCreatedProject2()
   function getCreatedProject(txid, callback) {
-    FundingHub.deployed().NewProject({}, { fromBlock: 0 }).get((err, res) => {
-      if (err) return callback(err)
-      let createEvent = res.find(e => e.transactionHash === txid)
-      if (!createEvent) return callback('Project not created')
-      callback(null, createEvent.args.project)
-    })
-  }
-
-  // This is an alternative to the previous function that works on both testrpc and geth
-  function getCreatedProject2(txid, callback) {
     const EVENT_SIGNATURE = web3.sha3('NewProject(address,address)')
     web3.eth.getTransactionReceipt(txid, (err, receipt) => {
       if (err) return callback(err)

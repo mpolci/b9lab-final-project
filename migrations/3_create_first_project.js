@@ -2,8 +2,8 @@
 
 module.exports = function(deployer) {
   const NAME = "First Project"
-  const DESC = "b9lab final project"
-  const URL = "https://github.com/mpolci"
+  const DESC = "B9lab X16-1 final project"
+  const URL = "https://github.com/mpolci/b9lab-final-project"
   const TARGET = web3.toWei(10)
   const DEADLINE =  Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)  // 7 days from now
 
@@ -16,7 +16,7 @@ module.exports = function(deployer) {
   // ferify project creation by checking the NewProject event
   .then(() => new Promise(function(resolve, reject) {
     deployer.logger.log('Create project transaction: ' + createTx)
-    getCreatedProject2(createTx, (err, prjAddr) => {
+    getCreatedProject(createTx, (err, prjAddr) => {
       if (err) return reject(err)
       deployer.logger.log('New project at address: ' + prjAddr)
       resolve()
@@ -25,17 +25,19 @@ module.exports = function(deployer) {
 
   /*******************************************************************/
 
-  // on testrpc this code doesn't work for a bug https://github.com/ethereumjs/testrpc/issues/135
+  // On testrpc this code doesn't work due to a testrpc bug (see https://github.com/ethereumjs/testrpc/issues/145).
+  // It works on geth rpc node. For this reason I used the alternative
+  // implementation in getCreatedProject2()
   function getCreatedProject(txid, callback) {
-    FundingHub.deployed().NewProject().get((err, res) => {
+    FundingHub.deployed().NewProject({}, { fromBlock: 0 }).get((err, res) => {
       if (err) return callback(err)
-      let createEvent = res.find(e => e.transactionHash === createTx)
+      let createEvent = res.find(e => e.transactionHash === txid)
       if (!createEvent) return callback('Project not created')
       callback(null, createEvent.args.project)
     })
   }
 
-  // this is an alternative to the previous function that works on both testrpc and geth
+  // This is an alternative to the previous function that works on both testrpc and geth
   function getCreatedProject2(txid, callback) {
     const EVENT_SIGNATURE = web3.sha3('NewProject(address,address)')
     web3.eth.getTransactionReceipt(txid, (err, receipt) => {

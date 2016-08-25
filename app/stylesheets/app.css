@@ -1,3 +1,25 @@
+
 label {
   display: block;
+  padding-bottom: 5px;
+}
+
+ul.info {
+    list-style-type: none;
+    padding: 0;
+}
+
+.create input {
+    position: absolute;
+    left: 110px;
+}
+
+.error {
+    color: red;
+    margin-top: 1em;
+    font-size: large;
+}
+
+.projects a {
+    display: block;
 }

@@ -4,7 +4,6 @@
   <title>Funding Hub</title>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.min.js"></script>
-  <!-- <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'> -->
   <link href="./app.css" rel='stylesheet' type='text/css'>
   <script src="./app.js"></script>
   <script src="./angularapp.js"></script>
@@ -12,40 +11,41 @@
 <body>
   <h1>Funding Hub</h1>
 
-  <section class="action" ng-controller="controlAccountController as control">
+  <section ng-controller="controlAccountController as control">
     <h2>My account</h2>
     <div ng-if="!control.error">
-      <label for="account">Select a control account: </label>
-      <select id="account"
-        ng-model="control.selected"
-        ng-change="control.onSelectedChange()">
-        <option ng-repeat="a in control.accounts" value="{{a}}">{{ $index }}</option>
-      </select>
-      <div class="info">
-        <span>Address: {{ control.selected }}</span>
-        <span>balance: {{ control.balance | unitEther }} eth</span>
-      </div>
+      <label >Select a control account:
+        <select id="account"
+          ng-model="control.selected"
+          ng-change="control.onSelectedChange()">
+          <option ng-repeat="a in control.accounts" value="{{a}}">{{ $index }}</option>
+        </select>
+     </label>
+      <ul class="info">
+        <li>Address: {{ control.selected }}</li>
+        <li>balance: {{ control.balance | unitEther }} eth</li>
+      </ul>
     </div>
-    
+
     <div class="error" ng-if="control.error">
       Cannot fetch accounts list.
     </div>
 
   </section>
 
-  <div ng-controller="ProjectsList as list">
-    <section>
-      <h2>Projects</h2>
-      <a href ui-state="'create'">Create a new project</a>
-      <div ng-repeat="prj in list.projects">
-        <a href ui-state="'project'" ui-state-params="{ address: prj.address }" ui-state-opts="{prova: 1}">{{prj.address}} - {{prj.name}}</a>
-      </div>
-    </section>
-
-  </div>
+  <section class="projects" ng-controller="ProjectsList as list">
+    <h2>Projects</h2>
+    <a href ui-state="'create'">Create a new project</a>
+    <a ng-repeat="prj in list.projects"
+       href
+       ui-state="'project'"
+       ui-state-params="{ address: prj.address }"
+       ui-state-opts="{prova: 1}">
+      {{prj.address}} - {{prj.name}}
+    </a>
+  </section>
 
   <div ui-view></div>
-
 
 </body>
 </html>

@@ -74,7 +74,9 @@ angular.module('fundingHubApp').service('fundingHubService', function ($rootScop
   }
 
   function createProject(name, desc, url, target, deadline) {
-    if (!name || !target || !deadline) return $q.reject('Missing argument')
+    if (!(parseInt(target) > 0)) return $q.reject('Target cannot be 0')
+    if (!name || !deadline) return $q.reject('Missing argument')
+    if (deadline <= Date.now() / 1000) return $q.reject('The deadline is not in the future')
     var source = controlAccountService.selectedAccount
     var gas = 800000
     var tx

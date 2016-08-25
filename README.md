@@ -15,4 +15,6 @@ The **FundingHub** stores the deploying account address as *maintainer* of the h
 
 # Tests
 You can run test against testrpc or geth. To use geth you must increase the constant
-`DEADLINE_SECS` in the file *test/refund.js*.
+`DEADLINE_SECS` in the file *test/refund.js*. The test uses the accounts from 1 to 4, do not use them for mining.
+
+Verified with TestRPC v2.2.1

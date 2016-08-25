@@ -3,6 +3,9 @@
 // DEADLINE_SECS: use value of 1 if testing againts testrpc, use a value of 30 seconds if testing against geth
 const DEADLINE_SECS = 1
 
+const GAS_CONTRIBUTE =  500000
+const GAS_CREATE =     1000000
+
 function waitMined(txnHash) {
   const interval =  1000
   const maxwait = 500000
@@ -25,7 +28,7 @@ contract('FundingHub', accounts => {
   before(() => {
     hub = FundingHub.deployed()
   })
-  describe('createProject', () => {
+  describe('createProject()', () => {
     let filterNewProject
     afterEach(()=> {
       filterNewProject.stopWatching()
@@ -40,24 +43,27 @@ contract('FundingHub', accounts => {
           createTxid = txid
         }
       }
-      filterNewProject = hub.NewProject({owner: accounts[0]}, function (error, result) {
+      filterNewProject = hub.NewProject({owner: accounts[4]}, function (error, result) {
         if (error) return done(error)
         checkTxid(result.transactionHash)
       })
       const deadline =  Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)  // 7 days from now
-      hub.createProject("test Project", "b9lab final project", "https://github.com/mpolci", web3.toWei(1), deadline, {from: accounts[0], gas: 800000})
+      hub.createProject("test Project", "b9lab final project", "https://github.com/mpolci", web3.toWei(1), deadline, {from: accounts[4], gas: GAS_CREATE})
       .then(txid => checkTxid(txid))
       .catch(done)
     })
   })
 
-  describe('contribute', () => {
+  describe('contribute()', () => {
     let project
     beforeEach(done => {
       const deadline =  Math.floor(Date.now() / 1000) + DEADLINE_SECS
-      hub.createProject("test Project", "b9lab final project", "https://github.com/mpolci", web3.toWei(1), deadline, {from: accounts[0], gas: 800000})
+      hub.createProject("test Project", "b9lab final project", "https://github.com/mpolci", web3.toWei(1), deadline, {from: accounts[4], gas: GAS_CREATE})
       .then(txid => {
         let receipt = web3.eth.getTransactionReceipt(txid)
+        // warning! trying to avoid a testrpc bug https://github.com/ethereumjs/testrpc/issues/146
+        let gasUsed = web3.eth.getTransactionReceipt(txid).gasUsed || web3.eth.getTransactionReceipt(txid).cumulativeGasUsed
+        if (gasUsed === GAS_CREATE) return done('Out of gas')
         const EVENT_SIGNATURE = web3.sha3('NewProject(address,address)')
         let log = receipt.logs.find(l => l.topics[0] === EVENT_SIGNATURE)
         if (!log) return done('No project created')
@@ -71,9 +77,12 @@ contract('FundingHub', accounts => {
       const AMOUNT = web3.toWei(0.1)
       let startingBalance = web3.eth.getBalance(accounts[1])
       let payedForGas
-      return hub.contribute(project.address, {from: accounts[1], value: AMOUNT, gas: 500000})
+      return hub.contribute(project.address, {from: accounts[1], value: AMOUNT, gas: GAS_CONTRIBUTE})
       .then(txid => {
-        payedForGas = web3.eth.getTransactionReceipt(txid).gasUsed * web3.eth.getTransaction(txid).gasPrice
+        // warning! trying to avoid a testrpc bug https://github.com/ethereumjs/testrpc/issues/146
+        let gasUsed = web3.eth.getTransactionReceipt(txid).gasUsed || web3.eth.getTransactionReceipt(txid).cumulativeGasUsed
+        assert.notEqual(gasUsed, GAS_CONTRIBUTE, 'Out of gas')
+        payedForGas = web3.eth.getTransaction(txid).gasPrice.mul(gasUsed)
       })
       .then(() => project.contributionOf.call(accounts[1]))
       .then(contribution => {
@@ -88,28 +97,30 @@ contract('FundingHub', accounts => {
       const contribs = [0, web3.toWei(0.1), web3.toWei(0.2), web3.toWei(0.3)]
       let balances = []
       return Promise.all([
-        hub.contribute(project.address, {from: accounts[1], value: contribs[1], gas: 500000}),
-        hub.contribute(project.address, {from: accounts[2], value: contribs[2], gas: 500000}),
-        hub.contribute(project.address, {from: accounts[3], value: contribs[3], gas: 500000}),
+        hub.contribute(project.address, {from: accounts[1], value: contribs[1], gas: GAS_CONTRIBUTE}),
+        hub.contribute(project.address, {from: accounts[2], value: contribs[2], gas: GAS_CONTRIBUTE}),
+        hub.contribute(project.address, {from: accounts[3], value: contribs[3], gas: GAS_CONTRIBUTE}),
       ])
       .then(txs => Promise.all(txs.map(waitMined)))  // redundant with truffle 2
       .then(() => {
-        for (let i=0; i<=3; i++)
+        for (let i=1; i<=4; i++)
           balances[i] = web3.eth.getBalance(accounts[i])
       })
       .then(() => new Promise(function(resolve, reject) {
         setTimeout(resolve, DEADLINE_SECS * 1000);
       }))
-      .then(() => hub.contribute(project.address, {from: accounts[0], value: web3.toWei(0.4), gas: 500000}))
+      .then(() => hub.contribute(project.address, {from: accounts[4], value: web3.toWei(0.4), gas: GAS_CONTRIBUTE}))
       .then(txid => waitMined(txid))  // redundant with truffle 2
       .then(txid => {
-        let gasUsed = web3.eth.getTransactionReceipt(txid).gasUsed
+        // warning! trying to avoid a testrpc bug https://github.com/ethereumjs/testrpc/issues/146
+        let gasUsed = web3.eth.getTransactionReceipt(txid).gasUsed || web3.eth.getTransactionReceipt(txid).cumulativeGasUsed
+        assert.notEqual(gasUsed, GAS_CONTRIBUTE, 'Out of gas')
         let gasPrice = web3.eth.getTransaction(txid).gasPrice
         let actualBalances = []
-        for (let i=0; i<=3; i++)
+        for (let i=1; i<=4; i++)
           actualBalances[i] = web3.eth.getBalance(accounts[i])
 
-        assert.equal(actualBalances[0].plus(gasUsed * gasPrice).toString(), balances[0].toString(), 'last contribute should coming back')
+        assert.equal(balances[4].minus(actualBalances[4]).toString(), gasPrice.mul(gasUsed).toString(), 'last contribute should coming back')
         assert.equal(actualBalances[1].minus(balances[1]).toString(), contribs[1], 'account 1 refunded')
         assert.equal(actualBalances[2].minus(balances[2]).toString(), contribs[2], 'account 2 refunded')
         assert.equal(actualBalances[3].minus(balances[3]).toString(), contribs[3], 'account 3 refunded')

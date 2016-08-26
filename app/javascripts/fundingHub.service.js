@@ -98,9 +98,12 @@ angular.module('fundingHubApp').service('fundingHubService', function ($rootScop
     if (!prjAddr) return $q.reject('Unknown project address')
     var prj = Project.at(prjAddr)
     var source = controlAccountService.selectedAccount
-    var gas = 300000
-    var tx
-    return $q.when(hub.contribute(prjAddr, {from: source, value: amount, gas: gas}))
+    var gas, tx
+    return $q.when(hub.contribute.estimateGas(prjAddr, {from: source, value: amount, gas: gas}))
+    .then(function (estimated) {
+      gas = estimated + 100000
+      return hub.contribute(prjAddr, {from: source, value: amount, gas: gas})
+    })
     .then(function (txid) {
       $rootScope.$broadcast('NewTransaction', { from: source, txid: txid })
       tx = txid

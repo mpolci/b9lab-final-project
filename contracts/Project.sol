@@ -18,9 +18,11 @@ contract Project {
     uint amount;
     uint index;
   }
-  
+
   mapping (address => Contributor) contributorInfo;
   address[] public contributors;
+
+  event refundFailed(address contributor);
 
   function Project(address _owner, string _name, string _description, string _url, uint _targetAmount, uint _deadline) {
     if (_owner == 0) throw;
@@ -99,6 +101,7 @@ contract Project {
         if (!target.send(c.amount)) {
           // ignore transfer errors because all untrasfered funds will be forwarded
           // to the hub to be handled by the maintainer
+          refundFailed(target);
         }
       }
       // forward untrasfered ethers to the hub to be handled by the maintainer

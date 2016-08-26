@@ -4,8 +4,6 @@ contract FundingHub {
   address public maintainer;
   mapping (address => bool) public inHub;
   address[] public projects;
-  // TODO: projects mi permette di ottenere solo l'indirizzo di un progetto dato il suo indice,
-  // devo creare un'interfaccia che mi permetta il reperimento dei progetti
 
   event NewProject(address indexed owner, address project);
 

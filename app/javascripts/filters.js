@@ -1,6 +1,6 @@
 ;(function () {
 
-  let filters = [
+  var filters = [
     {
       name: 'ethereumTimestamp',
       toView: function (data) { return new Date(data * 1000) },
@@ -13,7 +13,7 @@
     },
   ]
 
-  let app = angular.module('fundingHubApp')
+  var app = angular.module('fundingHubApp')
   filters.forEach(function (f) {
     app.filter(f.name, function () {
       return f.toView

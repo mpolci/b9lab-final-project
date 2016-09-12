@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="fundingHubApp">
+<html>
 <head>
   <title>Funding Hub</title>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.js"></script>
@@ -8,7 +8,7 @@
   <script src="./app.js"></script>
   <script src="./angularapp.js"></script>
 </head>
-<body>
+<body ng-cloack>
   <h1>Funding Hub</h1>
 
   <section ng-controller="controlAccountController as control">
@@ -47,5 +47,10 @@
 
   <div ui-view></div>
 
+  <script>
+    window.addEventListener('load', function() {
+      angular.bootstrap(document, ['fundingHubApp'])
+    })
+  </script>
 </body>
 </html>
